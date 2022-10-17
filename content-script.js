@@ -12,6 +12,7 @@ chrome.runtime.onMessage.addListener(async function (response, sendResponse) {
   var mutualIds = [];
 
   let retriesLeft = 100
+  let startScrollHeight = -1;
   let startScroll = window.scrollY
 
   // debugger;
@@ -25,6 +26,15 @@ chrome.runtime.onMessage.addListener(async function (response, sendResponse) {
     // debugger;
 
     console.log("🚀 ~ scrolled to", startScroll)
+
+    console.log({ startScroll, startScrollHeight })
+
+    if (startScroll === startScrollHeight) {
+      console.log("Everything stopped")
+      return;
+    }
+
+    startScrollHeight = startScroll;
 
     const profileDOMs = document.querySelectorAll('[data-testid="cellInnerDiv"]')
 
