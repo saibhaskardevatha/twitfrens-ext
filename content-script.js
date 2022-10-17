@@ -38,6 +38,7 @@ const renderListInDrawer = (profilesArray) => {
     `;
 		const MainComponent = `
             <header class="p-4 border-b-2 border-solid mb-12">
+			<div id="close-twitfrens">Close twitfrens</div>
               <div class="w-min flex mx-auto items-center space-x-2">
                 <svg
                   width="41"
@@ -94,6 +95,7 @@ const toggleRightLayout = (shouldOpenTwitFrens) => {
 		'div[data-testid="sidebarColumn"]'
 	);
 	const twimex = document.querySelector("#twemex--container div");
+	const twitfrens = document.getElementById("twitterUserList");
 
 	console.log("removing rest", twitterSearch, twimex);
 
@@ -105,7 +107,15 @@ const toggleRightLayout = (shouldOpenTwitFrens) => {
 		if (twimex) {
 			twimex.style.visibility = "hidden";
 		}
+
+		if (twitfrens) {
+			twitfrens.style.width = "25rem";
+		}
 	} else {
+		if (twitfrens) {
+			twitfrens.style.width = "0rem";
+		}
+
 		if (twitterSearch) {
 			twitterSearch.style.visibility = "hidden";
 		}
@@ -117,23 +127,19 @@ const toggleRightLayout = (shouldOpenTwitFrens) => {
 };
 
 chrome.runtime.onMessage.addListener(async function (response, sendResponse) {
+	// remove the existing page
+
+	const existingDrawer = document.getElementById("twitterUserList");
+	if (existingDrawer) {
+		document.body.removeChild(existingDrawer);
+	}
+
 	const Drawer = document.createElement("div");
 	Drawer.className = "sidepanel";
 	Drawer.id = "twitterUserList";
-
-	const closeButton = document.createElement("div");
-	closeButton.className = "twitfrens-close";
-	// closeButton.onclick = toggleRightLayout(false);
-
 	document.body.appendChild(Drawer);
 
 	const container = '[aria-labelledby="accessible-list-1"]';
-	console.log(
-		"🚀 ~ file: content-script.js ~ line 4 ~ response, sendResponse",
-		response,
-		sendResponse
-	);
-	// storing the scroll position
 
 	// storing all the connections
 	var mutualConnections = [];
@@ -141,7 +147,7 @@ chrome.runtime.onMessage.addListener(async function (response, sendResponse) {
 	// track the dublicates in the list
 	var mutualIds = [];
 
-	let retriesLeft = 100;
+	let retriesLeft = 5;
 	let startScrollHeight = -1;
 	let startScroll = window.scrollY;
 
@@ -149,22 +155,28 @@ chrome.runtime.onMessage.addListener(async function (response, sendResponse) {
 
 	toggleRightLayout(true);
 
+	let listenerAttached = false;
+
 	const scrollAndScan = async () => {
-		if (retriesLeft <= 0) {
-			console.log(
-				"🚀 ~ file: content-script.js ~ line 21 ~ scrollAndScan ~ retriesLeft",
-				retriesLeft
-			);
-			return;
-		}
-		// debugger;
-
-		console.log("🚀 ~ scrolled to", startScroll);
-
-		console.log({ startScroll, startScrollHeight });
-
 		renderListInDrawer(mutualConnections);
+
+		if (!listenerAttached) {
+			const closeButton = document.getElementById("close-twitfrens");
+
+			if (closeButton) {
+				console.log("hello", { closeButton, listenerAttached });
+				listenerAttached = true;
+				closeButton.addEventListener("click", function () {
+					console.log("pringint this");
+					toggleRightLayout(false);
+				});
+				console.log("hello post", { closeButton, listenerAttached });
+			}
+		}
+
+		console.log({ retriesLeft, startScrollHeight, startScroll });
 		if (startScroll === startScrollHeight) {
+			// if (startScroll === startScrollHeight && retriesLeft === 0) {
 			console.log("Everything stopped");
 			console.log({ mutualIds, mutualConnections });
 			return;
@@ -208,15 +220,15 @@ chrome.runtime.onMessage.addListener(async function (response, sendResponse) {
 
 		// check if the scroll position has changed
 		if (startScroll === window.scrollY) {
-			console.log(
-				"🚀 ~ file: content-script.js ~ line 57 ~ scrollAndScan ~ startScroll === window.scrollY",
-				startScroll,
-				window.scrollY,
-				window.innerHeight
-			);
+			// console.log(
+			// 	"🚀 ~ file: content-script.js ~ line 57 ~ scrollAndScan ~ startScroll === window.scrollY",
+			// 	startScroll,
+			// 	window.scrollY,
+			// 	window.innerHeight
+			// );
 			// debugger;
 			await waitForDOMChange(container, 500);
-			retriesLeft--;
+			// retriesLeft--;
 
 			// debugger;
 			// await window.scrollTo(0, window.scrollY + window.innerHeight);
