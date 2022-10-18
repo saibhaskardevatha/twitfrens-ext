@@ -1,0 +1,11 @@
+.sidepanel {
+	position: fixed !important;
+	overflow: auto;
+	top: 0;
+	right: 0;
+	height: 100vh;
+	background: white;
+	width: 25rem;
+	border-left: 1px solid #d8d8d8;
+	position: relative;
+}
